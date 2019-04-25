@@ -119,53 +119,6 @@ def game_hash
   }
 end
 
-
-def big_shoe_rebounds
-  array_of_shoe_sizes = []
-    game_hash[:home][:players].each do |name, specific_data|
-      specific_data.each do |specific_data, value|
-        if specific_data == :shoe
-          array_of_shoe_sizes.push(value)
-        end
-      end
-    end
-
-    game_hash[:away][:players].each do |name, specific_data|
-      specific_data.each do |specific_data, value|
-        if specific_data == :shoe
-          array_of_shoe_sizes.push(value)
-        end
-      end
-    end
-
-  max_shoe_size = array_of_shoe_sizes.max # successfully identified largest shoe size.
-
-  # now go back into the hash and find the player with that shoe size.
-  #####################################################################
-  # in progress work below..
-
-  big_shoe_guy = []
-
-  game_hash[:home][:players].each do |name, attributes|
-    attributes.each do |attribute_name, value|
-      if attribute_name == :shoe && value == max_shoe_size
-        big_shoe_guy.push(name)
-      end
-    end
-  end
-
-  game_hash[:away][:players].each do |name, attributes|
-    attributes.each do |attribute_name, value|
-      if attribute_name == :shoe && value == max_shoe_size
-        big_shoe_guy.push(name)
-      end
-    end
-  end
-
-  game_hash[:home][:players][big_shoe_guy[0]][:rebounds]
-
-end
-
 def num_points_scored(player_name)
   if game_hash[:home][:players].has_key?(player_name.intern) == true
     game_hash[:home][:players][player_name.intern][:points]
@@ -231,4 +184,184 @@ def player_stats(player_name)
   elsif game_hash[:away][:players].has_key?(player_name.intern) == true
       game_hash[:away][:players][player_name.intern]
   end
+end
+
+def big_shoe_rebounds
+  array_of_shoe_sizes = []
+    game_hash[:home][:players].each do |name, specific_data|
+      specific_data.each do |specific_data, value|
+        if specific_data == :shoe
+          array_of_shoe_sizes.push(value)
+        end
+      end
+    end
+
+    game_hash[:away][:players].each do |name, specific_data|
+      specific_data.each do |specific_data, value|
+        if specific_data == :shoe
+          array_of_shoe_sizes.push(value)
+        end
+      end
+    end
+
+  max_shoe_size = array_of_shoe_sizes.max # successfully identified largest shoe size.
+
+  # now go back into the hash and find the player with that max shoe size.
+  #####################################################################
+
+  big_shoe_guy = []
+
+  game_hash[:home][:players].each do |name, attributes|
+    attributes.each do |attribute_name, value|
+      if attribute_name == :shoe && value == max_shoe_size
+        big_shoe_guy.push(name)
+      end
+    end
+  end
+
+  game_hash[:away][:players].each do |name, attributes|
+    attributes.each do |attribute_name, value|
+      if attribute_name == :shoe && value == max_shoe_size
+        big_shoe_guy.push(name)
+      end
+    end
+  end
+  game_hash[:home][:players][big_shoe_guy[0]][:rebounds]
+end
+
+### BONUS QUESTIONS ###########################
+
+def most_points_scored
+
+  # overall: we could replicate big_shoe_rebounds, but no. Let's try something new.
+  # New methodology: store the name and points as we go.
+
+  # In order to do this, we need to do a single iteration over the entire
+  # nested hash. (previous methods contained a :home and :away iteration.)
+
+  # 1.. spend some time getting more familiar with nested hash iteration.
+
+  # 2.. create two arrays; one for the name of the player with the most points
+  # And another for the value of that player's points scored.
+
+  # The starting value for those arrays is just the first player and their
+  # associated points scored.
+
+  # How do you find the "initial" of anything in a hash if that term doesn't exit?
+  # Do I HAVE to convert the hash into an array? There must be a work-around.
+  # All I want is to grab the first person's name... then I can
+  # access their points using bracket method and be on my way.
+  # Ah-hah! what if I return an array of keys and choose the [0]. Bam.
+
+  # 3. iterate down into the array and push point values and the associated
+  # names if the value is greater.
+
+  # 4. return points_leader[0].
+
+
+points_leader = []
+points_leader.push(game_hash[:home][:players].keys[0])
+highest_point_total = []
+highest_point_total.push(game_hash[:home][:players][points_leader[0]][:points])
+  game_hash.each do |team_location, full_team_data_hash|
+    full_team_data_hash.each do |team_attribute_keys, team_attribute_data_lists|
+      if team_attribute_keys == :players
+        team_attribute_data_lists.each do |player_name, player_stats_hash|
+          player_stats_hash.each do |individual_stat, stat_value|
+            if individual_stat == :points
+              if stat_value > highest_point_total[0]
+                highest_point_total.pop
+                highest_point_total.push(stat_value)
+                points_leader.unshift(player_name.to_s)
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+points_leader[0]
+end
+
+def winning_team
+home_team_points = []
+away_team_points = []
+    game_hash[:home][:players].each do |player_name, player_stats|
+      player_stats.each do |stat_name, stat_value|
+        if stat_name == :points
+          home_team_points.push(stat_value)
+        end
+      end
+    end
+    game_hash[:away][:players].each do |player_name, player_stats|
+      player_stats.each do |stat_name, stat_value|
+        if stat_name == :points
+          home_team_points.push(stat_value)
+        end
+      end
+    end
+  if home_team_points.sum > away_team_points.sum
+    return "Brooklyn Nets"
+  else
+    return "Charlotte Hornets"
+  end
+end
+
+def player_with_longest_name
+  long_name_haver = []
+  long_name_haver.push(game_hash[:home][:players].keys[0])
+  long_name_length = game_hash[:home][:players].keys[0].length
+  game_hash.each do |team_location, full_team_data_hash|
+    full_team_data_hash.each do |team_attribute_keys, team_attribute_data_lists|
+      if team_attribute_keys == :players
+        team_attribute_data_lists.each do |player_name, player_stats_hash|
+          if player_name.to_s.length > long_name_haver[0].length
+            long_name_haver.unshift(player_name)
+            long_name_length = player_name.to_s.length
+          end
+        end
+      end
+    end
+  end
+  long_name_haver[0].to_s
+end
+
+def long_name_steals_a_ton?
+
+# In the end, we want a comparison of player_with_longest_name and person with
+# the most steals.
+
+# plan: replicate the most_points_scored method for most_steals, then call
+# the player_with_longest_name method and compare those values.
+
+  steals_leader = []
+  steals_leader.push(game_hash[:home][:players].keys[0])
+  most_steals = []
+  most_steals.push(game_hash[:home][:players][steals_leader[0]][:steals])
+    game_hash.each do |team_location, full_team_data_hash|
+      full_team_data_hash.each do |team_attribute_keys, team_attribute_data_lists|
+        if team_attribute_keys == :players
+          team_attribute_data_lists.each do |player_name, player_stats_hash|
+            player_stats_hash.each do |individual_stat, stat_value|
+              if individual_stat == :steals
+                if stat_value > most_steals[0]
+                  most_steals.pop
+                  most_steals.push(stat_value)
+                  steals_leader.unshift(player_name.to_s)
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+  longest_name = player_with_longest_name
+
+  if longest_name == steals_leader[0]
+    return true
+  else
+    nil
+  end
+
 end
