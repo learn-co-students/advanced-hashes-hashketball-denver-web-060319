@@ -178,10 +178,13 @@ def big_shoe_rebounds
     #who has the biggest shoes? 
     #find the name of the player who has the biggest shoes
     arry = []
+    rbnd = []
     game_hash[:away][:players].each do |guy, value|
         value.each do |key, num|
             if key == :shoe
                 arry << num
+            elsif key == :rebounds
+                rbnd << num
             end
         end
     end
@@ -189,12 +192,15 @@ def big_shoe_rebounds
         value.each do |key, num|
             if key == :shoe
                 arry << num
+            elsif key == :rebounds
+                rbnd << num
             end
         end
     end
     
     #binding.pry
-    biggest_shoe = arry.max
+    #biggest_shoe = arry.max
+    most_rbnds = rbnds.max
 
     
 end
